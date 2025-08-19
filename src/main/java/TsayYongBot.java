@@ -66,11 +66,10 @@ public class TsayYongBot {
                     Task t = tasks.get(idx - 1);
                     t.markAsDone();
                     printBlock("Nice! I've marked this task as done:",
-                               "  " + t.pretty());
+                               "  " + t.toString());
                 }
                 continue;
             }
-
             idx = parseIndex("unmark", input);
             if (idx != null) {
                 if (idx < 1 || idx > tasks.size()) {
@@ -79,13 +78,70 @@ public class TsayYongBot {
                     Task t = tasks.get(idx - 1);
                     t.markAsNotDone();
                     printBlock("OK, I've marked this task as not done yet:",
-                               "  " + t.pretty());
+                               "  " + t.toString());
                 }
                 continue;
             }
 
-            tasks.add(new Task(input));
-            printBlock("added: " + input);
+            if (input.startsWith("todo")) {
+                String desc = input.length() > 4 ? input.substring(4).trim() : "";
+                if (desc.isEmpty()) {
+                    printBlock("OOPS!!! The description of a todo cannot be empty.");
+                } else {
+                    Task t = new Todo(desc);
+                    tasks.add(t);
+                    printBlock("Got it. I've added this task:",
+                               "  " + t.toString(),
+                               String.format("Now you have %d tasks in the list.", tasks.size()));
+                }
+                continue;
+            }
+
+            if (input.startsWith("deadline")) {
+                String rest = input.length() > 8 ? input.substring(8).trim() : "";
+                int byPos = rest.indexOf(" /by ");
+                if (byPos == -1) {
+                    printBlock("OOPS!!! For deadlines, use: deadline <desc> /by <when>");
+                } else {
+                    String desc = rest.substring(0, byPos).trim();
+                    String by = rest.substring(byPos + 5).trim();
+                    if (desc.isEmpty() || by.isEmpty()) {
+                        printBlock("OOPS!!! The description and /by must not be empty.");
+                    } else {
+                        Task t = new Deadline(desc, by);
+                        tasks.add(t);
+                        printBlock("Got it. I've added this task:",
+                                   "  " + t.toString(),
+                                   String.format("Now you have %d tasks in the list.", tasks.size()));
+                    }
+                }
+                continue;
+            }
+
+            if (input.startsWith("event")) {
+                String rest = input.length() > 5 ? input.substring(5).trim() : "";
+                int fromPos = rest.indexOf(" /from ");
+                int toPos = rest.indexOf(" /to ");
+                if (fromPos == -1 || toPos == -1 || toPos <= fromPos) {
+                    printBlock("OOPS!!! For events, use: event <desc> /from <start> /to <end>");
+                } else {
+                    String desc = rest.substring(0, fromPos).trim();
+                    String from = rest.substring(fromPos + 7, toPos).trim();
+                    String to = rest.substring(toPos + 5).trim();
+                    if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                        printBlock("OOPS!!! The description, /from, and /to must not be empty.");
+                    } else {
+                        Task t = new Event(desc, from, to);
+                        tasks.add(t);
+                        printBlock("Got it. I've added this task:",
+                                   "  " + t.toString(),
+                                   String.format("Now you have %d tasks in the list.", tasks.size()));
+                    }
+                }
+                continue;
+            }
+
+            printBlock("OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
         sc.close();
     }

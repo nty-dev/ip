@@ -1,5 +1,5 @@
-public class Task {
-    protected String description;
+public abstract class Task {
+    protected final String description;
     protected boolean isDone;
 
     public Task(String description) {
@@ -19,8 +19,10 @@ public class Task {
         return (isDone ? "X" : " ");
     }
 
+    protected abstract TaskType getType();
+
     public String pretty() {
-        return String.format("[%s] %s", getStatusIcon(), description);
+        return String.format("[%s][%s] %s", getType().symbol(), getStatusIcon(), description);
     }
 
     @Override

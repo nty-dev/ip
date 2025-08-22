@@ -7,7 +7,12 @@ public class Deadline extends Task {
     }
 
     @Override
+    protected TaskType getType() {
+        return TaskType.DEADLINE;
+    }
+
+    @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + by + ")";
+        return super.toString() + " (by: " + by + ")";
     }
 }

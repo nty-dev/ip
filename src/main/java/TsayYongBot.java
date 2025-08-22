@@ -27,20 +27,27 @@ public class TsayYongBot {
         printBlock(lines);
     }
 
-    private static Integer parseIndex(String cmd, String input) {
+    private static void ensure(boolean condition, String message) throws TsayYongBotException {
+        if (!condition) throw new TsayYongBotException(message);
+    }
+
+    private static int parseIndexStrict(String cmd, String input, int max)
+            throws TsayYongBotException {
         String[] parts = input.trim().split("\\s+");
-        if (parts.length != 2) return null;
-        if (!parts[0].equals(cmd)) return null;
+        ensure(parts.length == 2 && parts[0].equals(cmd),
+               "Usage: " + cmd + " <task-number>");
+        int idx;
         try {
-            return Integer.valueOf(parts[1]);
+            idx = Integer.parseInt(parts[1]);
         } catch (NumberFormatException e) {
-            return null;
+            throw new TsayYongBotException("The task number for '" + cmd + "' must be an integer.");
         }
+        ensure(idx >= 1 && idx <= max, "That task number is out of range.");
+        return idx;
     }
 
     public static void main(String[] args) {
         List<Task> tasks = new ArrayList<>();
-
         printBlock("Hello! I'm the Tsay Yong Bot", "What can I do for you?");
 
         Scanner sc = new Scanner(System.in);
@@ -48,100 +55,82 @@ public class TsayYongBot {
             if (!sc.hasNextLine()) break;
             String input = sc.nextLine().trim();
 
-            if (input.equals("bye")) {
-                printBlock("Bye. Hope to see you again soon!");
-                break;
-            }
+            try {
+                if (input.equals("bye")) {
+                    printBlock("Bye. Hope to see you again soon!");
+                    break;
+                }
 
-            if (input.equals("list")) {
-                printList(tasks);
-                continue;
-            }
+                if (input.equals("list")) {
+                    printList(tasks);
+                    continue;
+                }
 
-            Integer idx = parseIndex("mark", input);
-            if (idx != null) {
-                if (idx < 1 || idx > tasks.size()) {
-                    printBlock("OOPS!!! That task number is out of range.");
-                } else {
+                if (input.startsWith("mark")) {
+                    int idx = parseIndexStrict("mark", input, tasks.size());
                     Task t = tasks.get(idx - 1);
                     t.markAsDone();
                     printBlock("Nice! I've marked this task as done:",
                                "  " + t.toString());
+                    continue;
                 }
-                continue;
-            }
-            idx = parseIndex("unmark", input);
-            if (idx != null) {
-                if (idx < 1 || idx > tasks.size()) {
-                    printBlock("OOPS!!! That task number is out of range.");
-                } else {
+
+                if (input.startsWith("unmark")) {
+                    int idx = parseIndexStrict("unmark", input, tasks.size());
                     Task t = tasks.get(idx - 1);
                     t.markAsNotDone();
                     printBlock("OK, I've marked this task as not done yet:",
                                "  " + t.toString());
+                    continue;
                 }
-                continue;
-            }
 
-            if (input.startsWith("todo")) {
-                String desc = input.length() > 4 ? input.substring(4).trim() : "";
-                if (desc.isEmpty()) {
-                    printBlock("OOPS!!! The description of a todo cannot be empty.");
-                } else {
+                if (input.startsWith("todo")) {
+                    String desc = input.length() > 4 ? input.substring(4).trim() : "";
+                    ensure(!desc.isEmpty(), "The description of a todo cannot be empty.");
                     Task t = new Todo(desc);
                     tasks.add(t);
                     printBlock("Got it. I've added this task:",
                                "  " + t.toString(),
                                String.format("Now you have %d tasks in the list.", tasks.size()));
+                    continue;
                 }
-                continue;
-            }
 
-            if (input.startsWith("deadline")) {
-                String rest = input.length() > 8 ? input.substring(8).trim() : "";
-                int byPos = rest.indexOf(" /by ");
-                if (byPos == -1) {
-                    printBlock("OOPS!!! For deadlines, use: deadline <desc> /by <when>");
-                } else {
+                if (input.startsWith("deadline")) {
+                    String rest = input.length() > 8 ? input.substring(8).trim() : "";
+                    int byPos = rest.indexOf(" /by ");
+                    ensure(byPos != -1, "For deadlines, use: deadline <desc> /by <when>");
                     String desc = rest.substring(0, byPos).trim();
                     String by = rest.substring(byPos + 5).trim();
-                    if (desc.isEmpty() || by.isEmpty()) {
-                        printBlock("OOPS!!! The description and /by must not be empty.");
-                    } else {
-                        Task t = new Deadline(desc, by);
-                        tasks.add(t);
-                        printBlock("Got it. I've added this task:",
-                                   "  " + t.toString(),
-                                   String.format("Now you have %d tasks in the list.", tasks.size()));
-                    }
+                    Task t = new Deadline(desc, by);
+                    tasks.add(t);
+                    printBlock("Got it. I've added this task:",
+                               "  " + t.toString(),
+                               String.format("Now you have %d tasks in the list.", tasks.size()));
+                    continue;
                 }
-                continue;
-            }
 
-            if (input.startsWith("event")) {
-                String rest = input.length() > 5 ? input.substring(5).trim() : "";
-                int fromPos = rest.indexOf(" /from ");
-                int toPos = rest.indexOf(" /to ");
-                if (fromPos == -1 || toPos == -1 || toPos <= fromPos) {
-                    printBlock("OOPS!!! For events, use: event <desc> /from <start> /to <end>");
-                } else {
+                if (input.startsWith("event")) {
+                    String rest = input.length() > 5 ? input.substring(5).trim() : "";
+                    int fromPos = rest.indexOf(" /from ");
+                    int toPos = rest.indexOf(" /to ");
+                    ensure(fromPos != -1 && toPos != -1 && toPos > fromPos,
+                           "For events, use: event <desc> /from <start> /to <end>");
                     String desc = rest.substring(0, fromPos).trim();
                     String from = rest.substring(fromPos + 7, toPos).trim();
                     String to = rest.substring(toPos + 5).trim();
-                    if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
-                        printBlock("OOPS!!! The description, /from, and /to must not be empty.");
-                    } else {
-                        Task t = new Event(desc, from, to);
-                        tasks.add(t);
-                        printBlock("Got it. I've added this task:",
-                                   "  " + t.toString(),
-                                   String.format("Now you have %d tasks in the list.", tasks.size()));
-                    }
+                    Task t = new Event(desc, from, to);
+                    tasks.add(t);
+                    printBlock("Got it. I've added this task:",
+                               "  " + t.toString(),
+                               String.format("Now you have %d tasks in the list.", tasks.size()));
+                    continue;
                 }
-                continue;
-            }
 
-            printBlock("OOPS!!! I'm sorry, but I don't know what that means :-(");
+                throw new TsayYongBotException("I'm sorry, but I don't know what that means :-(");
+
+            } catch (TsayYongBotException e) {
+                printBlock("OOPS!!! " + e.getMessage());
+            }
         }
         sc.close();
     }

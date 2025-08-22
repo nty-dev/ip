@@ -126,6 +126,15 @@ public class TsayYongBot {
                     continue;
                 }
 
+                if (input.toLowerCase().startsWith("delete")) {
+                    int idx = parseIndexStrict("delete", input, tasks.size());
+                    Task removed = tasks.remove(idx - 1);
+                    printBlock("Noted. I've removed this task:",
+                            "  " + removed.toString(),
+                            String.format("Now you have %d tasks in the list.", tasks.size()));
+                    continue;
+                }
+
                 throw new TsayYongBotException("I'm sorry, but I don't know what that means :-(");
 
             } catch (TsayYongBotException e) {

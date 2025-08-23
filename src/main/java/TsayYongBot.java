@@ -1,169 +1,84 @@
+
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 
 public class TsayYongBot {
-    private static final String LINE =
-            "____________________________________________________________";
 
-    private static void printBlock(String... lines) {
-        System.out.println(LINE);
-        for (String s : lines) {
-            System.out.println(" " + s);
-        }
-        System.out.println(LINE);
-    }
-
-    private static void printList(List<Task> tasks) {
-        if (tasks.isEmpty()) {
-            printBlock("(no tasks yet)");
-            return;
-        }
-        String[] lines = new String[tasks.size() + 1];
-        lines[0] = "Here are the tasks in your list:";
-        for (int i = 0; i < tasks.size(); i++) {
-            lines[i + 1] = String.format("%d.%s", i + 1, tasks.get(i));
-        }
-        printBlock(lines);
-    }
-
-    private static void ensure(boolean condition, String message) throws TsayYongBotException {
-        if (!condition) throw new TsayYongBotException(message);
-    }
-
-    private static void persist(Storage storage, List<Task> tasks) {
+    private static void persist(Storage storage, TaskList tasks) {
         try {
-            storage.save(tasks);
+            storage.save(tasks.asList());
         } catch (Exception e) {
             System.err.println("Save failed: " + e.getMessage());
         }
     }
 
-    private static int parseIndexStrict(String cmd, String input, int max)
-            throws TsayYongBotException {
-        String[] parts = input.trim().split("\\s+");
-        ensure(parts.length == 2 && parts[0].equals(cmd),
-               "Usage: " + cmd + " <task-number>");
-        int idx;
+    public void run() {
+        Ui ui = new Ui();
+        Storage storage = new Storage(Paths.get("data", "tsayyongbot.jsonl"));
+        TaskList tasks;
         try {
-            idx = Integer.parseInt(parts[1]);
-        } catch (NumberFormatException e) {
-            throw new TsayYongBotException("The task number for '" + cmd + "' must be an integer.");
+            tasks = new TaskList(storage.load());
+        } catch (Exception e) {
+            System.err.println("Load failed, starting empty: " + e.getMessage());
+            tasks = new TaskList();
         }
-        ensure(idx >= 1 && idx <= max, "That task number is out of range.");
-        return idx;
+
+        ui.showWelcome();
+        boolean isExit = false;
+        while (!isExit) {
+            try {
+                String full = ui.readCommand();
+                if (full == null) {
+                    break; // EOF
+
+                                }Parser.Parsed p = Parser.parse(full);
+
+                switch (p.type) {
+                    case BYE -> {
+                        ui.showGoodbye();
+                        isExit = true;
+                    }
+                    case LIST ->
+                        ui.showList(tasks.asList());
+                    case TODO -> {
+                        Task t = tasks.addTodo(p.desc);
+                        ui.showAdded(t, tasks.size());
+                        persist(storage, tasks);
+                    }
+                    case DEADLINE -> {
+                        Task t = tasks.addDeadline(p.desc, p.by);
+                        ui.showAdded(t, tasks.size());
+                        persist(storage, tasks);
+                    }
+                    case EVENT -> {
+                        Task t = tasks.addEvent(p.desc, p.from, p.to);
+                        ui.showAdded(t, tasks.size());
+                        persist(storage, tasks);
+                    }
+                    case MARK -> {
+                        Task t = tasks.mark(p.index);
+                        ui.showMarked(t);
+                        persist(storage, tasks);
+                    }
+                    case UNMARK -> {
+                        Task t = tasks.unmark(p.index);
+                        ui.showUnmarked(t);
+                        persist(storage, tasks);
+                    }
+                    case DELETE -> {
+                        Task removed = tasks.delete(p.index);
+                        ui.showRemoved(removed, tasks.size());
+                        persist(storage, tasks);
+                    }
+                    default ->
+                        throw new TsayYongBotException("Unknown command.");
+                }
+            } catch (TsayYongBotException e) {
+                ui.showError(e.getMessage());
+            }
+        }
     }
 
     public static void main(String[] args) {
-        Storage storage = new Storage(Paths.get("data", "tsayyongbot.jsonl"));
-        List<Task> tasks;
-        try {
-            tasks = storage.load();
-        } catch (Exception e) {
-            tasks = new ArrayList<>();
-        }
-        
-        printBlock("Hello! I'm the Tsay Yong Bot", "What can I do for you?");
-
-        Scanner sc = new Scanner(System.in);
-        while (true) {
-            if (!sc.hasNextLine()) break;
-            String input = sc.nextLine().trim();
-
-            try {
-                if (input.equals("bye")) {
-                    printBlock("Bye. Hope to see you again soon!");
-                    persist(storage, tasks);
-                    break;
-                }
-
-                if (input.equals("list")) {
-                    printList(tasks);
-                    continue;
-                }
-
-                if (input.startsWith("mark")) {
-                    int idx = parseIndexStrict("mark", input, tasks.size());
-                    Task t = tasks.get(idx - 1);
-                    t.markAsDone();
-                    printBlock("Nice! I've marked this task as done:",
-                               "  " + t.toString());
-                    persist(storage, tasks);
-                    continue;
-                }
-
-                if (input.startsWith("unmark")) {
-                    int idx = parseIndexStrict("unmark", input, tasks.size());
-                    Task t = tasks.get(idx - 1);
-                    t.markAsNotDone();
-                    printBlock("OK, I've marked this task as not done yet:",
-                               "  " + t.toString());
-                    persist(storage, tasks);
-                    continue;
-                }
-
-                if (input.startsWith("todo")) {
-                    String desc = input.length() > 4 ? input.substring(4).trim() : "";
-                    ensure(!desc.isEmpty(), "The description of a todo cannot be empty.");
-                    Task t = new Todo(desc);
-                    tasks.add(t);
-                    printBlock("Got it. I've added this task:",
-                               "  " + t.toString(),
-                               String.format("Now you have %d tasks in the list.", tasks.size()));
-                    persist(storage, tasks);
-                    continue;
-                }
-
-                if (input.startsWith("deadline")) {
-                    String rest = input.length() > 8 ? input.substring(8).trim() : "";
-                    int byPos = rest.indexOf(" /by ");
-                    ensure(byPos != -1, "For deadlines, use: deadline <desc> /by <when>");
-                    String desc = rest.substring(0, byPos).trim();
-                    String by = rest.substring(byPos + 5).trim();
-                    Task t = new Deadline(desc, by);
-                    tasks.add(t);
-                    printBlock("Got it. I've added this task:",
-                               "  " + t.toString(),
-                               String.format("Now you have %d tasks in the list.", tasks.size()));
-                    persist(storage, tasks);
-                    continue;
-                }
-
-                if (input.startsWith("event")) {
-                    String rest = input.length() > 5 ? input.substring(5).trim() : "";
-                    int fromPos = rest.indexOf(" /from ");
-                    int toPos = rest.indexOf(" /to ");
-                    ensure(fromPos != -1 && toPos != -1 && toPos > fromPos,
-                           "For events, use: event <desc> /from <start> /to <end>");
-                    String desc = rest.substring(0, fromPos).trim();
-                    String from = rest.substring(fromPos + 7, toPos).trim();
-                    String to = rest.substring(toPos + 5).trim();
-                    Task t = new Event(desc, from, to);
-                    tasks.add(t);
-                    printBlock("Got it. I've added this task:",
-                               "  " + t.toString(),
-                               String.format("Now you have %d tasks in the list.", tasks.size()));
-                    persist(storage, tasks);
-                    continue;
-                }
-
-                if (input.toLowerCase().startsWith("delete")) {
-                    int idx = parseIndexStrict("delete", input, tasks.size());
-                    Task removed = tasks.remove(idx - 1);
-                    printBlock("Noted. I've removed this task:",
-                            "  " + removed.toString(),
-                            String.format("Now you have %d tasks in the list.", tasks.size()));
-                    persist(storage, tasks);
-                    continue;
-                }
-
-                throw new TsayYongBotException("I'm sorry, but I don't know what that means :-(");
-
-            } catch (TsayYongBotException e) {
-                printBlock("OOPS!!! " + e.getMessage());
-            }
-        }
-        sc.close();
+        new TsayYongBot().run();
     }
 }

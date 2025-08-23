@@ -6,6 +6,10 @@ public class Deadline extends Task {
         this.by = by;
     }
 
+    public String getBy() {
+        return by;
+    }
+
     @Override
     protected TaskType getType() {
         return TaskType.DEADLINE;

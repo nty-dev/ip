@@ -20,6 +20,14 @@ public abstract class Task {
     }
 
     protected abstract TaskType getType();
+    
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean isDone() {
+        return isDone;
+    }
 
     public String pretty() {
         return String.format("[%s][%s] %s", getType().symbol(), getStatusIcon(), description);

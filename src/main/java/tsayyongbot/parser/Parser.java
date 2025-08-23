@@ -1,3 +1,5 @@
+package tsayyongbot.parser;
+import tsayyongbot.core.TsayYongBotException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

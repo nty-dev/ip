@@ -1,9 +1,16 @@
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public class Deadline extends Task {
     protected final String by;
+    private final LocalDate date;
+    private final LocalDateTime dateTime;
 
     public Deadline(String description, String by) {
         super(description);
         this.by = by;
+        this.dateTime = Dates.tryParseDateTime(by);
+        this.date = (this.dateTime == null) ? Dates.tryParseDate(by) : null;
     }
 
     public String getBy() {
@@ -17,6 +24,14 @@ public class Deadline extends Task {
 
     @Override
     public String toString() {
-        return super.toString() + " (by: " + by + ")";
+        String display;
+        if (dateTime != null) {
+            display = Dates.format(dateTime);
+        } else if (date != null) {
+            display = Dates.format(date);
+        } else {
+            display = by;
+        }
+        return super.toString() + " (by: " + display + ")";
     }
 }

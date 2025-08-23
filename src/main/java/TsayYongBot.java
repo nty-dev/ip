@@ -1,3 +1,4 @@
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -31,6 +32,14 @@ public class TsayYongBot {
         if (!condition) throw new TsayYongBotException(message);
     }
 
+    private static void persist(Storage storage, List<Task> tasks) {
+        try {
+            storage.save(tasks);
+        } catch (Exception e) {
+            System.err.println("Save failed: " + e.getMessage());
+        }
+    }
+
     private static int parseIndexStrict(String cmd, String input, int max)
             throws TsayYongBotException {
         String[] parts = input.trim().split("\\s+");
@@ -47,7 +56,14 @@ public class TsayYongBot {
     }
 
     public static void main(String[] args) {
-        List<Task> tasks = new ArrayList<>();
+        Storage storage = new Storage(Paths.get("data", "tsayyongbot.jsonl"));
+        List<Task> tasks;
+        try {
+            tasks = storage.load();
+        } catch (Exception e) {
+            tasks = new ArrayList<>();
+        }
+        
         printBlock("Hello! I'm the Tsay Yong Bot", "What can I do for you?");
 
         Scanner sc = new Scanner(System.in);
@@ -58,6 +74,7 @@ public class TsayYongBot {
             try {
                 if (input.equals("bye")) {
                     printBlock("Bye. Hope to see you again soon!");
+                    persist(storage, tasks);
                     break;
                 }
 
@@ -72,6 +89,7 @@ public class TsayYongBot {
                     t.markAsDone();
                     printBlock("Nice! I've marked this task as done:",
                                "  " + t.toString());
+                    persist(storage, tasks);
                     continue;
                 }
 
@@ -81,6 +99,7 @@ public class TsayYongBot {
                     t.markAsNotDone();
                     printBlock("OK, I've marked this task as not done yet:",
                                "  " + t.toString());
+                    persist(storage, tasks);
                     continue;
                 }
 
@@ -92,6 +111,7 @@ public class TsayYongBot {
                     printBlock("Got it. I've added this task:",
                                "  " + t.toString(),
                                String.format("Now you have %d tasks in the list.", tasks.size()));
+                    persist(storage, tasks);
                     continue;
                 }
 
@@ -106,6 +126,7 @@ public class TsayYongBot {
                     printBlock("Got it. I've added this task:",
                                "  " + t.toString(),
                                String.format("Now you have %d tasks in the list.", tasks.size()));
+                    persist(storage, tasks);
                     continue;
                 }
 
@@ -123,6 +144,7 @@ public class TsayYongBot {
                     printBlock("Got it. I've added this task:",
                                "  " + t.toString(),
                                String.format("Now you have %d tasks in the list.", tasks.size()));
+                    persist(storage, tasks);
                     continue;
                 }
 
@@ -132,6 +154,7 @@ public class TsayYongBot {
                     printBlock("Noted. I've removed this task:",
                             "  " + removed.toString(),
                             String.format("Now you have %d tasks in the list.", tasks.size()));
+                    persist(storage, tasks);
                     continue;
                 }
 

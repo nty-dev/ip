@@ -80,32 +80,6 @@ public class TaskList {
         return t;
     }
 
-    public Task snoozeDeadline(int oneBasedIndex, String newBy) {
-        int i = oneBasedIndex - 1;
-        if (i < 0 || i >= tasks.size()) {
-            throw new IllegalArgumentException("That task number is out of range.");
-        }
-        Task t = tasks.get(i);
-        if (!(t instanceof Deadline)) {
-            throw new IllegalArgumentException("Snooze with /by works only for deadlines.");
-        }
-        ((Deadline) t).setBy(newBy);
-        return t;
-    }
-
-    public Task snoozeEvent(int oneBasedIndex, String newFrom, String newTo) {
-        int i = oneBasedIndex - 1;
-        if (i < 0 || i >= tasks.size()) {
-            throw new IllegalArgumentException("That task number is out of range.");
-        }
-        Task t = tasks.get(i);
-        if (!(t instanceof Event)) {
-            throw new IllegalArgumentException("Snooze with /from ... /to ... works only for events.");
-        }
-        ((Event) t).setSchedule(newFrom, newTo);
-        return t;
-    }
-
     /**
      * Returns tasks whose descriptions contain the given keyword
      * (case-insensitive).
@@ -114,9 +88,12 @@ public class TaskList {
      * @return matching tasks in original order
      */
     public List<Task> find(String keyword) {
-        final String kw = keyword.trim().toLowerCase(Locale.ROOT);
-        return tasks.stream()
-                .filter(t -> t.toString().toLowerCase(Locale.ROOT).contains(kw))
-                .collect(Collectors.toList());
+        String k = keyword.toLowerCase();
+        List<Task> res = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getDescription().toLowerCase().contains(k))
+                res.add(t);
+        }
+        return res;
     }
 }

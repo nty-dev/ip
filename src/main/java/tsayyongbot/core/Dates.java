@@ -13,25 +13,37 @@ public final class Dates {
             DateTimeFormatter.ISO_LOCAL_DATE
     };
 
-    private static final DateTimeFormatter D_OUT  = DateTimeFormatter.ofPattern("MMM d yyyy");
+    private static final DateTimeFormatter D_OUT = DateTimeFormatter.ofPattern("MMM d yyyy");
     private static final DateTimeFormatter DT_OUT = DateTimeFormatter.ofPattern("MMM d yyyy, h:mm a");
 
     public static LocalDateTime tryParseDateTime(String s) {
         for (DateTimeFormatter f : DT_INPUTS) {
-            try { return LocalDateTime.parse(s, f); } catch (Exception ignore) {}
+            try {
+                return LocalDateTime.parse(s, f);
+            } catch (Exception ignore) {
+            }
         }
         return null;
     }
 
     public static LocalDate tryParseDate(String s) {
         for (DateTimeFormatter f : D_INPUTS) {
-            try { return LocalDate.parse(s, f); } catch (Exception ignore) {}
+            try {
+                return LocalDate.parse(s, f);
+            } catch (Exception ignore) {
+            }
         }
         return null;
     }
 
-    public static String format(LocalDate d)       { return d.format(D_OUT); }
-    public static String format(LocalDateTime dt)  { return dt.format(DT_OUT); }
+    public static String format(LocalDate d) {
+        return d.format(D_OUT);
+    }
 
-    private Dates() {}
+    public static String format(LocalDateTime dt) {
+        return dt.format(DT_OUT);
+    }
+
+    private Dates() {
+    }
 }

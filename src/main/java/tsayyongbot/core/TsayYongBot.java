@@ -1,4 +1,5 @@
 package tsayyongbot.core;
+
 import tsayyongbot.ui.Ui;
 import tsayyongbot.parser.Parser;
 import tsayyongbot.io.Storage;
@@ -44,7 +45,8 @@ public class TsayYongBot {
                 if (full == null) {
                     break; // EOF
 
-                                }Parser.Parsed p = Parser.parse(full);
+                }
+                Parser.Parsed p = Parser.parse(full);
 
                 switch (p.type) {
                     case BYE -> {

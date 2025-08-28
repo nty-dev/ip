@@ -61,6 +61,18 @@ public class Ui {
         block(lines);
     }
 
+    public void showFindResults(List<Task> matches) {
+        if (matches.isEmpty()) {
+            block("No matching tasks found.");
+            return;
+        }
+        String[] lines = new String[matches.size() + 1];
+        lines[0] = "Here are the matching tasks in your list:";
+        for (int i = 0; i < matches.size(); i++)
+            lines[i + 1] = (i + 1) + "." + matches.get(i);
+        block(lines);
+    }
+
     public String readCommand() {
         return sc.hasNextLine() ? sc.nextLine().trim() : null;
     }

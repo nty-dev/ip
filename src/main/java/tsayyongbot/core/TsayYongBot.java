@@ -43,8 +43,7 @@ public class TsayYongBot {
             try {
                 String full = ui.readCommand();
                 if (full == null) {
-                    break; // EOF
-
+                    break;
                 }
                 Parser.Parsed p = Parser.parse(full);
 
@@ -84,6 +83,9 @@ public class TsayYongBot {
                         Task removed = tasks.delete(p.index);
                         ui.showRemoved(removed, tasks.size());
                         persist(storage, tasks);
+                    }
+                    case FIND -> {
+                        ui.showFindResults(tasks.find(p.desc));
                     }
                     default ->
                         throw new TsayYongBotException("Unknown command.");

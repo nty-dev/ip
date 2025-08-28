@@ -1,4 +1,5 @@
 package tsayyongbot.core;
+
 import tsayyongbot.ui.Ui;
 import tsayyongbot.parser.Parser;
 import tsayyongbot.io.Storage;
@@ -33,9 +34,9 @@ public class TsayYongBot {
             try {
                 String full = ui.readCommand();
                 if (full == null) {
-                    break; // EOF
-
-                                }Parser.Parsed p = Parser.parse(full);
+                    break;
+                }
+                Parser.Parsed p = Parser.parse(full);
 
                 switch (p.type) {
                     case BYE -> {
@@ -73,6 +74,9 @@ public class TsayYongBot {
                         Task removed = tasks.delete(p.index);
                         ui.showRemoved(removed, tasks.size());
                         persist(storage, tasks);
+                    }
+                    case FIND -> {
+                        ui.showFindResults(tasks.find(p.desc));
                     }
                     default ->
                         throw new TsayYongBotException("Unknown command.");

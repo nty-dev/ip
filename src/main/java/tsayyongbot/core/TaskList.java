@@ -1,4 +1,5 @@
 package tsayyongbot.core;
+
 import tsayyongbot.task.Task;
 import tsayyongbot.task.Todo;
 import tsayyongbot.task.Deadline;
@@ -68,5 +69,15 @@ public class TaskList {
         Task t = tasks.get(idx1 - 1);
         t.markAsNotDone();
         return t;
+    }
+
+    public List<Task> find(String keyword) {
+        String k = keyword.toLowerCase();
+        List<Task> res = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getDescription().toLowerCase().contains(k))
+                res.add(t);
+        }
+        return res;
     }
 }

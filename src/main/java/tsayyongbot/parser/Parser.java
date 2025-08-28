@@ -1,4 +1,5 @@
 package tsayyongbot.parser;
+
 import tsayyongbot.core.TsayYongBotException;
 
 import java.util.regex.Matcher;
@@ -7,7 +8,7 @@ import java.util.regex.Pattern;
 public class Parser {
 
     public enum CommandType {
-        BYE, LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, UNKNOWN
+        BYE, LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, FIND, UNKNOWN
     }
 
     public static final class Parsed {
@@ -34,12 +35,11 @@ public class Parser {
         }
     }
 
-    private static final Pattern TODO_RE
-            = Pattern.compile("^todo\\s+(.+)$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern DEADLINE_RE
-            = Pattern.compile("^deadline\\s+(.+?)\\s*/by\\s*(.+)$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern EVENT_RE
-            = Pattern.compile("^event\\s+(.+?)\\s*/from\\s*(.+?)\\s*/to\\s*(.+)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TODO_RE = Pattern.compile("^todo\\s+(.+)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DEADLINE_RE = Pattern.compile("^deadline\\s+(.+?)\\s*/by\\s*(.+)$",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern EVENT_RE = Pattern.compile("^event\\s+(.+?)\\s*/from\\s*(.+?)\\s*/to\\s*(.+)$",
+            Pattern.CASE_INSENSITIVE);
 
     private static int parseIndex(String cmd, String input) throws TsayYongBotException {
         Matcher m = Pattern.compile("^" + Pattern.quote(cmd) + "\\s+(\\d+)$", Pattern.CASE_INSENSITIVE).matcher(input);
@@ -52,7 +52,7 @@ public class Parser {
     public static Parsed parse(String input) throws TsayYongBotException {
         if (input == null || input.isEmpty()) {
             throw new TsayYongBotException(
-                    "Unknown command. Try: todo, deadline, event, list, mark, unmark, delete, bye.");
+                    "Unknown command. Try: todo, deadline, event, list, mark, unmark, delete, find, bye.");
         }
 
         if (input.equalsIgnoreCase("bye")) {
@@ -70,6 +70,12 @@ public class Parser {
         }
         if (input.toLowerCase().startsWith("delete")) {
             return new Parsed(CommandType.DELETE, null, null, null, null, parseIndex("delete", input));
+        }
+        if (input.toLowerCase().startsWith("find")) {
+            Matcher mf = Pattern.compile("^find\\s+(.+)$", Pattern.CASE_INSENSITIVE).matcher(input);
+            if (!mf.matches())
+                throw new TsayYongBotException("Usage: find <keyword>");
+            return new Parsed(CommandType.FIND, mf.group(1).trim(), null, null, null, null);
         }
 
         Matcher mt = TODO_RE.matcher(input);

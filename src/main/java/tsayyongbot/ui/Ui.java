@@ -5,6 +5,8 @@ import tsayyongbot.task.Task;
 
 import java.util.Scanner;
 
+/** Handles all user-facing text I/O via the console. */
+
 public class Ui {
 
     private static final String LINE = "____________________________________________________________";

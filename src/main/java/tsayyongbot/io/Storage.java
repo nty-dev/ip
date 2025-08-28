@@ -13,6 +13,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Loads and saves tasks to disk using newline-delimited JSON (NDJSON).
+ *
+ * <p>
+ * Each line is a single JSON object, with Base64-encoded text fields to avoid
+ * escaping issues.
+ * The file and parent directory are created on first use if absent.
+ */
 public class Storage {
     private final Path file;
 
@@ -20,6 +28,15 @@ public class Storage {
         this.file = file;
     }
 
+    /**
+     * Loads tasks from disk.
+     *
+     * <p>
+     * Unknown or corrupted lines are skipped silently; the remainder are returned.
+     *
+     * @return list of tasks (possibly empty)
+     * @throws IOException if the file cannot be read or created
+     */
     public List<Task> load() throws IOException {
         List<Task> tasks = new ArrayList<>();
         ensureFileReady();
@@ -56,6 +73,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Saves the given tasks to disk, replacing previous content.
+     *
+     * @param tasks tasks to serialize
+     * @throws IOException if writing fails
+     */
     public void save(List<Task> tasks) throws IOException {
         ensureDirReady();
         List<String> lines = new ArrayList<>();

@@ -1,8 +1,8 @@
 package tsayyongbot.ui;
+
 import java.util.List;
 import tsayyongbot.task.Task;
 
-import java.util.List;
 import java.util.Scanner;
 
 public class Ui {

@@ -1,4 +1,5 @@
 package tsayyongbot.parser;
+
 import tsayyongbot.core.TsayYongBotException;
 
 import java.util.regex.Matcher;
@@ -34,12 +35,11 @@ public class Parser {
         }
     }
 
-    private static final Pattern TODO_RE
-            = Pattern.compile("^todo\\s+(.+)$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern DEADLINE_RE
-            = Pattern.compile("^deadline\\s+(.+?)\\s*/by\\s*(.+)$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern EVENT_RE
-            = Pattern.compile("^event\\s+(.+?)\\s*/from\\s*(.+?)\\s*/to\\s*(.+)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TODO_RE = Pattern.compile("^todo\\s+(.+)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DEADLINE_RE = Pattern.compile("^deadline\\s+(.+?)\\s*/by\\s*(.+)$",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern EVENT_RE = Pattern.compile("^event\\s+(.+?)\\s*/from\\s*(.+?)\\s*/to\\s*(.+)$",
+            Pattern.CASE_INSENSITIVE);
 
     private static int parseIndex(String cmd, String input) throws TsayYongBotException {
         Matcher m = Pattern.compile("^" + Pattern.quote(cmd) + "\\s+(\\d+)$", Pattern.CASE_INSENSITIVE).matcher(input);

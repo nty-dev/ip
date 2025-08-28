@@ -10,6 +10,7 @@ public enum TaskType {
     TaskType(char symbol) {
         this.symbol = symbol;
     }
+
     public char symbol() {
         return symbol;
     }

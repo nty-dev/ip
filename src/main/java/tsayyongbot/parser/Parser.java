@@ -4,12 +4,23 @@ import tsayyongbot.core.TsayYongBotException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Parses raw user input strings into structured commands and arguments.
+ */
 public class Parser {
 
     public enum CommandType {
         BYE, LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, UNKNOWN
     }
 
+    /**
+     * Parses a full command line into a {@link Parsed} structure.
+     * 
+     * @param input the raw line entered by the user
+     * @return the parsed command
+     * @throws tsayyongbot.core.TsayYongBotException if the command is invalid or
+     *                                               incomplete
+     */
     public static final class Parsed {
 
         public final CommandType type;

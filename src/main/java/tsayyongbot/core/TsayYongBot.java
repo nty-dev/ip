@@ -6,6 +6,11 @@ import tsayyongbot.task.*;
 
 import java.nio.file.Paths;
 
+/**
+ * Entry point and main event loop for TsayYongBot.
+ *
+ * Coordinates the UI, parser, storage and the in-memory task list.
+ */
 public class TsayYongBot {
 
     private static void persist(Storage storage, TaskList tasks) {
@@ -16,6 +21,10 @@ public class TsayYongBot {
         }
     }
 
+    /**
+     * Runs the interactive loop until the user issues {@code bye} or EOF is
+     * reached.
+     */
     public void run() {
         Ui ui = new Ui();
         Storage storage = new Storage(Paths.get("data", "tsayyongbot.jsonl"));
@@ -83,6 +92,11 @@ public class TsayYongBot {
         }
     }
 
+    /**
+     * Program entry point.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
         new TsayYongBot().run();
     }

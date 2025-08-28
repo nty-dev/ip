@@ -1,4 +1,5 @@
 package tsayyongbot.io;
+
 import tsayyongbot.task.*;
 
 import java.io.IOException;
@@ -12,18 +13,38 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Loads and saves tasks to disk using newline-delimited JSON (NDJSON).
+ *
+ * <p>
+ * Each line is a single JSON object, with Base64-encoded text fields to avoid
+ * escaping issues.
+ * The file and parent directory are created on first use if absent.
+ */
 public class Storage {
     private final Path file;
 
-    public Storage(Path file) { this.file = file; }
+    public Storage(Path file) {
+        this.file = file;
+    }
 
+    /**
+     * Loads tasks from disk.
+     *
+     * <p>
+     * Unknown or corrupted lines are skipped silently; the remainder are returned.
+     *
+     * @return list of tasks (possibly empty)
+     * @throws IOException if the file cannot be read or created
+     */
     public List<Task> load() throws IOException {
         List<Task> tasks = new ArrayList<>();
         ensureFileReady();
 
         for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
             line = line.trim();
-            if (line.isEmpty() || line.startsWith("//")) continue;
+            if (line.isEmpty() || line.startsWith("//"))
+                continue;
 
             try {
                 String type = getStr(line, "type");
@@ -38,12 +59,13 @@ public class Storage {
                     t = new Deadline(desc, by);
                 } else if ("E".equals(type)) {
                     String from = unb64(nvl(getStr(line, "from_b64")));
-                    String to   = unb64(nvl(getStr(line, "to_b64")));
+                    String to = unb64(nvl(getStr(line, "to_b64")));
                     t = new Event(desc, from, to);
                 } else {
                     continue;
                 }
-                if (done) t.markAsDone();
+                if (done)
+                    t.markAsDone();
                 tasks.add(t);
             } catch (Exception ignore) {
             }
@@ -51,22 +73,31 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Saves the given tasks to disk, replacing previous content.
+     *
+     * @param tasks tasks to serialize
+     * @throws IOException if writing fails
+     */
     public void save(List<Task> tasks) throws IOException {
         ensureDirReady();
         List<String> lines = new ArrayList<>();
-        for (Task t : tasks) lines.add(serialize(t));
+        for (Task t : tasks)
+            lines.add(serialize(t));
         Files.write(file, lines, StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     private void ensureFileReady() throws IOException {
         ensureDirReady();
-        if (!Files.exists(file)) Files.createFile(file);
+        if (!Files.exists(file))
+            Files.createFile(file);
     }
 
     private void ensureDirReady() throws IOException {
         Path parent = file.getParent();
-        if (parent != null && !Files.exists(parent)) Files.createDirectories(parent);
+        if (parent != null && !Files.exists(parent))
+            Files.createDirectories(parent);
     }
 
     private static String serialize(Task t) {
@@ -85,9 +116,12 @@ public class Storage {
     }
 
     private static String typeOf(Task t) {
-        if (t instanceof Todo) return "T";
-        if (t instanceof Deadline) return "D";
-        if (t instanceof Event) return "E";
+        if (t instanceof Todo)
+            return "T";
+        if (t instanceof Deadline)
+            return "D";
+        if (t instanceof Event)
+            return "E";
         return "?";
     }
 
@@ -97,7 +131,8 @@ public class Storage {
     private static String getStr(String json, String key) {
         Matcher m = STR_FIELD.matcher(json);
         while (m.find()) {
-            if (m.group(1).equals(key)) return m.group(2);
+            if (m.group(1).equals(key))
+                return m.group(2);
         }
         return null;
     }
@@ -105,7 +140,8 @@ public class Storage {
     private static boolean getBool(String json, String key) {
         Matcher m = BOOL_FIELD.matcher(json);
         while (m.find()) {
-            if (m.group(1).equals(key)) return Boolean.parseBoolean(m.group(2));
+            if (m.group(1).equals(key))
+                return Boolean.parseBoolean(m.group(2));
         }
         return false;
     }
@@ -118,5 +154,7 @@ public class Storage {
         return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
     }
 
-    private static String nvl(String s) { return s == null ? "" : s; }
+    private static String nvl(String s) {
+        return s == null ? "" : s;
+    }
 }

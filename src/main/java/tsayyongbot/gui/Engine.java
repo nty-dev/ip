@@ -176,8 +176,12 @@ public class Engine {
         return sb.toString();
     }
 
-    private static String block(String s) {
-        return "____________________________________________________________\n " +
-                s.replace("\n", "\n ") + "\n____________________________________________________________";
+    private static String block(String... lines) {
+        StringBuilder sb = new StringBuilder("____________________________________________________________\n");
+        for (String s : lines) {
+            sb.append(' ').append(s).append('\n');
+        }
+        sb.append("____________________________________________________________");
+        return sb.toString();
     }
 }

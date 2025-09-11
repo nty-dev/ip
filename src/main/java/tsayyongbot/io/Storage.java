@@ -10,8 +10,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Loads and saves tasks to disk using newline-delimited JSON (NDJSON).
@@ -38,39 +41,49 @@ public class Storage {
      * @throws IOException if the file cannot be read or created
      */
     public List<Task> load() throws IOException {
-        List<Task> tasks = new ArrayList<>();
         ensureFileReady();
 
-        for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
-            line = line.trim();
-            if (line.isEmpty() || line.startsWith("//"))
-                continue;
+        try (Stream<String> lines = Files.lines(file, StandardCharsets.UTF_8)) {
+            return lines
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty() && !s.startsWith("//"))
+                    .map(s -> {
+                        try {
+                            String type = getStr(s, "type");
+                            boolean done = getBool(s, "done");
+                            String desc = unb64(getStr(s, "desc_b64"));
 
-            try {
-                String type = getStr(line, "type");
-                boolean done = getBool(line, "done");
-                String desc = unb64(getStr(line, "desc_b64"));
+                            Task t;
+                            switch (type) {
+                                case "T":
+                                    t = new Todo(desc);
+                                    break;
+                                case "D": {
+                                    String by = unb64(nvl(getStr(s, "by_b64")));
+                                    t = new Deadline(desc, by);
+                                    break;
+                                }
+                                case "E": {
+                                    String from = unb64(nvl(getStr(s, "from_b64")));
+                                    String to = unb64(nvl(getStr(s, "to_b64")));
+                                    t = new Event(desc, from, to);
+                                    break;
+                                }
+                                default:
+                                    return null;
+                            }
 
-                Task t;
-                if ("T".equals(type)) {
-                    t = new Todo(desc);
-                } else if ("D".equals(type)) {
-                    String by = unb64(nvl(getStr(line, "by_b64")));
-                    t = new Deadline(desc, by);
-                } else if ("E".equals(type)) {
-                    String from = unb64(nvl(getStr(line, "from_b64")));
-                    String to = unb64(nvl(getStr(line, "to_b64")));
-                    t = new Event(desc, from, to);
-                } else {
-                    continue;
-                }
-                if (done)
-                    t.markAsDone();
-                tasks.add(t);
-            } catch (Exception ignore) {
-            }
+                            if (done) {
+                                t.markAsDone();
+                            }
+                            return t;
+                        } catch (Exception ignore) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         }
-        return tasks;
     }
 
     /**

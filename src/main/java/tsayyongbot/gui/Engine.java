@@ -1,11 +1,13 @@
 package tsayyongbot.gui;
 
+import static tsayyongbot.util.Constants.LINE;
+import static tsayyongbot.util.Constants.SEP_BY;
+import static tsayyongbot.util.Constants.SEP_FROM;
+import static tsayyongbot.util.Constants.SEP_TO;
+
 import tsayyongbot.core.TaskList;
 import tsayyongbot.io.Storage;
-import tsayyongbot.task.Deadline;
-import tsayyongbot.task.Event;
 import tsayyongbot.task.Task;
-import tsayyongbot.task.Todo;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -76,7 +78,7 @@ public class Engine {
                 return block(added(t));
             }
             if (input.startsWith("deadline")) {
-                String[] p = splitTwo(input, "deadline", "/by");
+                String[] p = splitTwo(input, "deadline", SEP_BY);
                 if (p == null)
                     return block("For deadlines, use: deadline <desc> /by <when>");
                 Task t = tasks.addDeadline(p[0], p[1]);
@@ -84,7 +86,7 @@ public class Engine {
                 return block(added(t));
             }
             if (input.startsWith("event")) {
-                String[] p = splitThree(input, "event", "/from", "/to");
+                String[] p = splitThree(input, "event", SEP_FROM, SEP_TO);
                 if (p == null)
                     return block("For events, use: event <desc> /from <start> /to <end>");
                 Task t = tasks.addEvent(p[0], p[1], p[2]);
@@ -177,11 +179,11 @@ public class Engine {
     }
 
     private static String block(String... lines) {
-        StringBuilder sb = new StringBuilder("____________________________________________________________\n");
+        StringBuilder sb = new StringBuilder(LINE + "\n");
         for (String s : lines) {
             sb.append(' ').append(s).append('\n');
         }
-        sb.append("____________________________________________________________");
+        sb.append(LINE);
         return sb.toString();
     }
 }

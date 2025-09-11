@@ -1,5 +1,7 @@
 package tsayyongbot.ui;
 
+import static tsayyongbot.util.Constants.LINE;
+
 import java.util.List;
 import tsayyongbot.task.Task;
 
@@ -9,7 +11,6 @@ import java.util.Scanner;
 
 public class Ui {
 
-    private static final String LINE = "____________________________________________________________";
     private final Scanner sc = new Scanner(System.in);
 
     private void block(String... lines) {

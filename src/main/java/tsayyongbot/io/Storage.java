@@ -1,6 +1,9 @@
 package tsayyongbot.io;
 
-import tsayyongbot.task.*;
+import tsayyongbot.task.Task;
+import tsayyongbot.task.Todo;
+import tsayyongbot.task.Deadline;
+import tsayyongbot.task.Event;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

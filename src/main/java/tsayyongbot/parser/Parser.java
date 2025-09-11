@@ -61,6 +61,8 @@ public class Parser {
     }
 
     public static Parsed parse(String input) throws TsayYongBotException {
+        assert input != null : "Parser input must not be null";
+
         if (input == null || input.isEmpty()) {
             throw new TsayYongBotException(
                     "Unknown command. Try: todo, deadline, event, list, mark, unmark, delete, find, bye.");

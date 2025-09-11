@@ -7,6 +7,8 @@ import tsayyongbot.task.Event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Mutable list of tasks with operations to add, update, delete, and search.
@@ -86,12 +88,9 @@ public class TaskList {
      * @return matching tasks in original order
      */
     public List<Task> find(String keyword) {
-        String k = keyword.toLowerCase();
-        List<Task> res = new ArrayList<>();
-        for (Task t : tasks) {
-            if (t.getDescription().toLowerCase().contains(k))
-                res.add(t);
-        }
-        return res;
+        final String kw = keyword.trim().toLowerCase(Locale.ROOT);
+        return tasks.stream()
+                .filter(t -> t.toString().toLowerCase(Locale.ROOT).contains(kw))
+                .collect(Collectors.toList());
     }
 }

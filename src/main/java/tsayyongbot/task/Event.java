@@ -6,8 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Event extends Task {
-    protected final String from;
-    protected final String to;
+    protected String from;
+    protected String to;
 
     private final LocalDateTime fromDt, toDt;
     private final LocalDate fromDate, toDate;
@@ -25,6 +25,11 @@ public class Event extends Task {
         this.fromDate = (fromDt == null) ? Dates.tryParseDate(from) : null;
         this.toDate = (toDt == null) ? Dates.tryParseDate(to) : null;
         assert !toDate.isBefore(fromDate) : "Event end must be >= start";
+    }
+
+    public void setSchedule(String from, String to) {
+        this.from = from;
+        this.to = to;
     }
 
     public String getFrom() {

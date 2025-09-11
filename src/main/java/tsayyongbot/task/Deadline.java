@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Deadline extends Task {
-    protected final String by;
+    protected String by;
     private final LocalDate date;
     private final LocalDateTime dateTime;
 
@@ -17,6 +17,10 @@ public class Deadline extends Task {
         this.by = by;
         this.dateTime = Dates.tryParseDateTime(by);
         this.date = (this.dateTime == null) ? Dates.tryParseDate(by) : null;
+    }
+
+    public void setBy(String by) {
+        this.by = by;
     }
 
     public String getBy() {

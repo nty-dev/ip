@@ -93,6 +93,29 @@ public class Engine {
                 persist();
                 return block(added(t));
             }
+            if (input.startsWith("snooze")) {
+                String[] pBy = splitIndexAndTwo(input, "snooze", SEP_BY);
+                if (pBy != null) {
+                    int idx = parseIndexToken(pBy[0], tasks.size());
+                    String when = pBy[1];
+                    Task t = tasks.snoozeDeadline(idx, when);
+                    persist();
+                    return block("Rescheduled this task:\n  " + t);
+                }
+                String[] pRange = splitIndexAndRange(input, "snooze", SEP_FROM, SEP_TO);
+                if (pRange != null) {
+                    int idx = parseIndexToken(pRange[0], tasks.size());
+                    String start = pRange[1];
+                    String end = pRange[2];
+                    Task t = tasks.snoozeEvent(idx, start, end);
+                    persist();
+                    return block("Rescheduled this task:\n  " + t);
+                }
+                return block("Usage:\n"
+                        + "  snooze <task-number> " + SEP_BY + " <when>\n"
+                        + "  snooze <task-number> " + SEP_FROM + " <start> " + SEP_TO + " <end>");
+            }
+
             if (input.startsWith("find")) {
                 String kw = after(input, "find");
                 if (kw.isEmpty())
@@ -151,6 +174,65 @@ public class Engine {
         if (d.isEmpty() || f.isEmpty() || t.isEmpty())
             return null;
         return new String[] { d, f, t };
+    }
+
+    private static int parseIndexToken(String idxStr, int max) {
+        int idx;
+        try {
+            idx = Integer.parseInt(idxStr);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("The task number for 'snooze' must be an integer.");
+        }
+        if (idx < 1 || idx > max) {
+            throw new IllegalArgumentException("That task number is out of range.");
+        }
+        return idx;
+    }
+
+    private static String[] splitIndexAndTwo(String input, String head, String sep) {
+        String rest = after(input, head);
+        String[] headTail = rest.split("\\s+", 2);
+        if (headTail.length < 2)
+            return null;
+
+        String idx = headTail[0];
+        String tail = headTail[1].trim();
+
+        int pos = tail.indexOf(sep);
+        if (pos < 0)
+            return null;
+
+        String value = tail.substring(pos + sep.length()).trim();
+        if (value.isEmpty())
+            return null;
+
+        return new String[] { idx, value };
+    }
+
+    private static String[] splitIndexAndRange(String input, String head, String sepA, String sepB) {
+        String rest = after(input, head);
+        String[] headTail = rest.split("\\s+", 2);
+        if (headTail.length < 2)
+            return null;
+
+        String idx = headTail[0];
+        String tail = headTail[1].trim();
+
+        int a = tail.indexOf(sepA);
+        if (a < 0)
+            return null;
+
+        int b = tail.indexOf(sepB, a + sepA.length());
+        if (b < 0)
+            return null;
+
+        String from = tail.substring(a + sepA.length(), b).trim();
+        String to = tail.substring(b + sepB.length()).trim();
+
+        if (from.isEmpty() || to.isEmpty())
+            return null;
+
+        return new String[] { idx, from, to };
     }
 
     private String added(Task t) {

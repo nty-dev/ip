@@ -80,6 +80,32 @@ public class TaskList {
         return t;
     }
 
+    public Task snoozeDeadline(int oneBasedIndex, String newBy) {
+        int i = oneBasedIndex - 1;
+        if (i < 0 || i >= tasks.size()) {
+            throw new IllegalArgumentException("That task number is out of range.");
+        }
+        Task t = tasks.get(i);
+        if (!(t instanceof Deadline)) {
+            throw new IllegalArgumentException("Snooze with /by works only for deadlines.");
+        }
+        ((Deadline) t).setBy(newBy);
+        return t;
+    }
+
+    public Task snoozeEvent(int oneBasedIndex, String newFrom, String newTo) {
+        int i = oneBasedIndex - 1;
+        if (i < 0 || i >= tasks.size()) {
+            throw new IllegalArgumentException("That task number is out of range.");
+        }
+        Task t = tasks.get(i);
+        if (!(t instanceof Event)) {
+            throw new IllegalArgumentException("Snooze with /from ... /to ... works only for events.");
+        }
+        ((Event) t).setSchedule(newFrom, newTo);
+        return t;
+    }
+
     /**
      * Returns tasks whose descriptions contain the given keyword
      * (case-insensitive).

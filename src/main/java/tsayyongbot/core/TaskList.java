@@ -22,6 +22,10 @@ public class TaskList {
     }
 
     public TaskList(List<Task> initial) {
+        assert initial != null : "TaskList initial list must not be null";
+        for (Task t : initial) {
+            assert t != null : "TaskList must not contain null tasks";
+        }
         this.tasks = new ArrayList<>(initial);
     }
 

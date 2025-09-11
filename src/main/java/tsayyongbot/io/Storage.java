@@ -28,6 +28,7 @@ public class Storage {
     private final Path file;
 
     public Storage(Path file) {
+        assert file != null : "Storage path must not be null";
         this.file = file;
     }
 
@@ -99,6 +100,9 @@ public class Storage {
             lines.add(serialize(t));
         Files.write(file, lines, StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+        assert Files.exists(file.getParent()) : "data directory should exist after save";
+        assert Files.exists(file) : "data file should exist after save";
     }
 
     private void ensureFileReady() throws IOException {

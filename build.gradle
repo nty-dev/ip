@@ -35,6 +35,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    jvmArgs '-ea'
 
     testLogging {
         events "passed", "skipped", "failed"
@@ -49,6 +50,7 @@ test {
 
 application {
     mainClass.set("tsayyongbot.gui.Launcher")
+    applicationDefaultJvmArgs = ['-ea']
 }
 
 shadowJar {

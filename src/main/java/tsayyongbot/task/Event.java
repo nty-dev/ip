@@ -16,12 +16,15 @@ public class Event extends Task {
         super(description);
         this.from = from;
         this.to = to;
+        assert from != null && to != null : "Event times must not be null";
+        assert !from.trim().isEmpty() && !to.trim().isEmpty() : "Event times must not be empty";
 
         this.fromDt = Dates.tryParseDateTime(from);
         this.toDt = Dates.tryParseDateTime(to);
 
         this.fromDate = (fromDt == null) ? Dates.tryParseDate(from) : null;
         this.toDate = (toDt == null) ? Dates.tryParseDate(to) : null;
+        assert !toDate.isBefore(fromDate) : "Event end must be >= start";
     }
 
     public String getFrom() {

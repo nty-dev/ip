@@ -9,27 +9,42 @@ public class Event extends Task {
     protected String from;
     protected String to;
 
-    private final LocalDateTime fromDt, toDt;
-    private final LocalDate fromDate, toDate;
+    private LocalDateTime fromDt, toDt;
+    private LocalDate fromDate, toDate;
 
     public Event(String description, String from, String to) {
         super(description);
-        this.from = from;
-        this.to = to;
         assert from != null && to != null : "Event times must not be null";
         assert !from.trim().isEmpty() && !to.trim().isEmpty() : "Event times must not be empty";
+        setSchedule(from, to);
+        assertNonDecreasing();
+    }
+
+    public void setSchedule(String from, String to) {
+        this.from = from;
+        this.to = to;
 
         this.fromDt = Dates.tryParseDateTime(from);
         this.toDt = Dates.tryParseDateTime(to);
 
         this.fromDate = (fromDt == null) ? Dates.tryParseDate(from) : null;
         this.toDate = (toDt == null) ? Dates.tryParseDate(to) : null;
-        assert !toDate.isBefore(fromDate) : "Event end must be >= start";
+
+        assertNonDecreasing();
     }
 
-    public void setSchedule(String from, String to) {
-        this.from = from;
-        this.to = to;
+    private void assertNonDecreasing() {
+        // If both sides are date-times, compare them
+        if (fromDt != null && toDt != null) {
+            assert !toDt.isBefore(fromDt) : "Event end must be >= start";
+        }
+
+        // If both sides are dates (no time), compare them
+        if (fromDate != null && toDate != null) {
+            assert !toDate.isBefore(fromDate) : "Event end must be >= start";
+        }
+
+        // Mixed types (one parsed as date, the other as datetime) are not asserted
     }
 
     public String getFrom() {

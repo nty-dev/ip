@@ -7,20 +7,20 @@ import java.time.LocalDateTime;
 
 public class Deadline extends Task {
     protected String by;
-    private final LocalDate date;
-    private final LocalDateTime dateTime;
+    private LocalDate date;
+    private LocalDateTime dateTime;
 
     public Deadline(String description, String by) {
         super(description);
         assert by != null : "Deadline 'by' must not be null";
         assert !by.trim().isEmpty() : "Deadline 'by' must not be empty";
-        this.by = by;
-        this.dateTime = Dates.tryParseDateTime(by);
-        this.date = (this.dateTime == null) ? Dates.tryParseDate(by) : null;
+        setBy(by);
     }
 
     public void setBy(String by) {
         this.by = by;
+        this.dateTime = Dates.tryParseDateTime(by);
+        this.date = (this.dateTime == null) ? Dates.tryParseDate(by) : null;
     }
 
     public String getBy() {

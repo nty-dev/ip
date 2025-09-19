@@ -6,7 +6,7 @@ TsayYongBot is a **personal assistant chatbot** that helps you track tasks via a
 
 ---
 
-![screenshot](docs/Ui.png)
+![screenshot](Ui.png)
 
 ## Table of Contents
 

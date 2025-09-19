@@ -52,16 +52,10 @@ This launches the **GUI** (JavaFX). The app window is titled *TsayYongBot*.
 
 ### Run from JAR
 
-First build an all-in-one JAR:
+The FAT Jar will also be available on the [GitHub Releases page](https://github.com/nty-dev/ip/releases). Run it in an empty folder:
 
 ```bash
-./gradlew shadowJar
-```
-
-The fat JAR will be at `build/libs/duke.jar` (or `duke-all.jar` depending on your setup). Run it in an empty folder:
-
-```bash
-java -jar duke.jar
+java -jar TsayYongBot.jar
 ```
 
 ---

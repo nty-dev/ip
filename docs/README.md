@@ -6,6 +6,8 @@ TsayYongBot is a **personal assistant chatbot** that helps you track tasks via a
 
 ---
 
+![screenshot](docs/Ui.png)
+
 ## Table of Contents
 
 * [Quick Start](#quick-start)
@@ -246,14 +248,6 @@ Run unit tests with:
 | Find         | `find <keyword>`                               |
 | Snooze (DL)  | `snooze <task-number> /by <when>`              |
 | Snooze (EV)  | `snooze <task-number> /from <start> /to <end>` |
-
----
-
-### Enabling GitHub Pages
-
-1. Commit this file as **`docs/README.md`** in your repo.
-2. On GitHub: **Settings → Pages** → *Source*: `master` (or `main`) + `/docs` → **Save**.
-3. Visit `https://<your-username>.github.io/<repo-name>/` after a few minutes.
 
 ---
 
